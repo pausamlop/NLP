@@ -1,3 +1,4 @@
+import os
 import requests
 import pdfplumber
 
@@ -7,7 +8,7 @@ urls = [
     "https://www.grupomasviajes.com/guiasviaje/GuiaViajeROMA.pdf",
     "https://www.grupomasviajes.com/GuiasViaje/GuiaViajeLONDRES.pdf",
 ]
-
+output_path = "guides/"
 # Download and extract content
 for i, url in enumerate(urls):
     txt_filename = f"guide_{i + 1}.txt"
@@ -31,5 +32,5 @@ for i, url in enumerate(urls):
             # Se elimina la frase "Sugerimos contratar" en los documentos de "grupomasviajes"
             text = text.replace("Sugerimos contratar", "")
             all_text += text
-    with open(txt_filename, "w", encoding="utf-8") as txt_file:
+    with open(os.path.join(output_path, txt_filename), "w", encoding="utf-8") as txt_file:
         txt_file.write(all_text)
