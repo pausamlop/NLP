@@ -2,3 +2,4 @@ requests
 pdfplumber
 ollama 
 chromadb
+transfomers

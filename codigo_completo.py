@@ -3,17 +3,7 @@ import requests
 import pdfplumber
 import chromadb
 from ollama import Client  # type: ignore
-from langdetect import detect
-from googletrans import Translator  # Usaremos Google Translate para traducción (instala googletrans==4.0.0-rc1)
-
-
-def detect_language(text):
-    return detect(text)
-
-def translate_text(text, target_language):
-    translator = Translator()
-    translated = translator.translate(text, dest=target_language)
-    return translated.text
+from translator import load_translation_pipeline, translate_forward, translate_backwards
 
 ###############################################################################
 # Configuración
@@ -37,6 +27,9 @@ ollama_client = Client(
 
 # Modelo para generar embeddings
 llm_model_embeddings = "mxbai-embed-large"
+
+# Pipeline de traducción
+translator = load_translation_pipeline()
 
 ###############################################################################
 # Descargar y extraer texto de los PDFs
@@ -96,23 +89,15 @@ print("Todos los documentos han sido indexados correctamente.")
 # Hacer una consulta a la base de datos + detección idioma
 ###############################################################################
 
-prompt = "What are the main attractions in Rome?"
+prompt = "In which country is Rome? Please, answer briefly"
 
-#Paso 1: detectar el idioma
-language = detect_language(prompt)
-print(f"Idioma detectado: {language}")
+# traducción
+lang, prompt = translate_forward(translator, prompt)
 
-#Paso 2: Traducir ak español para antes de pasarle la pregunta al modelo
-if language != 'es':
-    print("Traduciendo pregunta al español...")
-    translator = Translator()
-    prompt_in_spanish = translator.translate(prompt, dest='es').text
-else:
-    prompt_in_spanish = prompt
 
 #Paso 3: Consultar la base de datos
 response = ollama_client.embeddings(
-    prompt=prompt_in_spanish,
+    prompt=prompt,
     model=llm_model_embeddings
 )
 results = collection.query(
@@ -124,12 +109,11 @@ results = collection.query(
 if len(results['documents']) > 0:
     relevant_document = results['documents'][0][0]
     answer = f"Se ha encontrado esta información: {relevant_document}"
-    print("Respuesta del chatbot:")
-    print(answer)
+    answer = translate_backwards(translator, answer[:1024], lang)
 else:
     print("Lo siento, no encontré información relevante para tu pregunta.")
 
 
 data = results['documents'][0][0]
 print("Documento más relevante:")
-print(data)
+# print(data)
