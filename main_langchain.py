@@ -1,6 +1,6 @@
 import os 
 from langchain_community.document_loaders import TextLoader
-from langchain_text_splitters import CharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.schema import Document
@@ -9,7 +9,7 @@ from langchain.schema import Document
 folder_path = "./guides/"
 
 documents = []
-text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
 
 class CustomTextLoader(TextLoader):
     def load(self):
@@ -27,6 +27,7 @@ for filename in os.listdir(folder_path):
         document = text_splitter.split_documents(raw_documents)
         # Add the chunks to the main list
         documents.extend(document)
+
 
 # Define the path to the pre-trained model you want to use
 modelPath = "sentence-transformers/all-MiniLM-l6-v2"
