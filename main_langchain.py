@@ -9,7 +9,7 @@ from langchain.schema import Document
 folder_path = "./guides/"
 
 documents = []
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
 
 class CustomTextLoader(TextLoader):
     def load(self):
