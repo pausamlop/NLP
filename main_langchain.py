@@ -4,6 +4,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.schema import Document
+import requests
+import json
 
 # Load the document, split it into chunks, embed each chunk and load it into the vector store.
 folder_path = "./guides/"
@@ -73,15 +75,37 @@ ensure_ollama_model(EMBEDDING_MODEL)
 ensure_ollama_model(LLM_MODEL)
 
 #---------------------------------------------------------------------------------
+
+# Generate response from ollama
+def generate_response(system, prompt):
+    data = {
+        "model": "llama3.1:8b-instruct-q8_0",
+        "system": system,
+        "prompt": prompt,
+        "stream": False,
+    }
+
+    url="http://kumo01:11434/api/generate"
+
+    headers = {"Content-Type": "application/json" }
+
+    try:
+        response = requests.post(url, headers=headers, data=json.dumps(data))
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return f"Error: {response.status_code}, {response.text}"
+
+    except Exception as e:
+        return f"An error occurred: {str(e)}"
+
+#---------------------------------------------------------------------------------
 if searchDocs != []:
-    # llm
-    # !ollama pull llama3:8B --> Run this before
-    llm = Ollama(model='llama3:8b')
 
     # prompt
     context = "\n\n".join([doc.page_content for doc in searchDocs])
     prompt = PromptTemplate(
-        template="""Using the following context, answer the question.
+        template="""Using the following context, answer the question. 
 
         ## Context:
         {context}
@@ -94,8 +118,8 @@ if searchDocs != []:
         input_variables=["context", "query"]
     )
 
-    chain = prompt | llm
-
-    # generate response
-    response = chain.invoke({"context": context, "question": question})
+    system = "You are a helpful AI Assistant"
+    prompt = "what are you?"
+    
+    response = generate_response(system, prompt)
     print("Generated Response:\n", response)
