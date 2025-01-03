@@ -1,3 +1,5 @@
+
+
 import os 
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -6,9 +8,15 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.schema import Document
 import requests
 import json
+import gensim
+from translator import load_translation_pipeline, translate_forward, translate_backwards
+from gensim import corpora
 
 # Load the document, split it into chunks, embed each chunk and load it into the vector store.
 folder_path = "./guides/"
+
+# Pipeline de traducción
+translator = load_translation_pipeline()
 
 documents = []
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
@@ -31,6 +39,16 @@ for filename in os.listdir(folder_path):
         documents.extend(document)
 
 
+def preprocess_documents(documents):
+    # Tokenization and stopword removal
+    stopwords = set(gensim.parsing.preprocessing.STOPWORDS)
+    processed_docs = []
+    for doc in documents:
+        tokens = gensim.utils.simple_preprocess(doc.page_content)
+        tokens = [token for token in tokens if token not in stopwords]
+        processed_docs.append(tokens)
+    return processed_docs
+
 # Define the path to the pre-trained model you want to use
 modelPath = "sentence-transformers/all-MiniLM-l6-v2"
 
@@ -49,7 +67,7 @@ embeddings = HuggingFaceEmbeddings(
 
 # Vector Stores
 db = FAISS.from_documents(documents, embeddings)
-question = "¿Cuántos km2 tiene la Ciudad del Vaticano?"
+question = "¿Cual es la zona más cercana a la playa de Barelona?"
 searchDocs = db.similarity_search(question)
 print(searchDocs[0].page_content)
 
@@ -102,8 +120,24 @@ def generate_response(system, prompt):
 #---------------------------------------------------------------------------------
 if searchDocs != []:
 
-    # prompt
     context = "\n\n".join([doc.page_content for doc in searchDocs])
+    # Preprocess the context (relevant documents) for LDA topic extraction
+    processed_context = preprocess_documents([Document(page_content=context)])
+    
+    # Create a dictionary and corpus for the search context
+    context_dictionary = corpora.Dictionary(processed_context)
+    context_corpus = [context_dictionary.doc2bow(doc) for doc in processed_context]
+
+    # Build the LDA model for the search context
+    context_lda_model = gensim.models.LdaMulticore(context_corpus, num_topics=5, id2word=context_dictionary, passes=10, workers=2)
+
+    # Get the topics
+    context_topics = context_lda_model.print_topics(num_words=5)  # Show top 5 words for each topic
+    print("Top Topics from the Search Results:")
+    for topic in context_topics:
+        print(topic)
+
+    #prompt
     prompt = PromptTemplate(
         template="""Using the following context, answer the question. 
 
@@ -119,7 +153,13 @@ if searchDocs != []:
     )
 
     system = "You are a helpful AI Assistant"
-    prompt = "what are you?"
-    
+    prompt = "What to visit in Barcelona?"
+
+    # traducción
+    lang, prompt = translate_forward(translator, prompt)
     response = generate_response(system, prompt)
-    print("Generated Response:\n", response)
+    print(response)
+    print(lang)
+    final_response = translate_backwards(translator, response['response'], lang)
+    print("Generated Response:\n", final_response)
+
