@@ -79,7 +79,7 @@ embeddings = HuggingFaceEmbeddings(
 
 # Vector Stores
 db = FAISS.from_documents(documents, embeddings)
-question = "¿Cual es la zona más famosa de Londres?"
+question = "¿Cual es la capital de Italia?"
 searchDocs = db.similarity_search(question)
 print(searchDocs[0].page_content)
 
