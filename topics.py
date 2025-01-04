@@ -1,4 +1,8 @@
-
+import gensim
+import spacy
+from gensim import corpora
+from gensim.parsing.preprocessing import STOPWORDS
+from langchain.schema import Document
 
 
 # Cargar el modelo de spaCy en español
@@ -43,3 +47,20 @@ def preprocess_documents(documents):
         processed_docs.append(tokens)
     
     return processed_docs
+
+def extract_topics(context):
+    # Preprocess the context (relevant documents) for LDA topic extraction
+    processed_context = preprocess_documents([Document(page_content=context)])
+    
+    # Create a dictionary and corpus for the search context
+    context_dictionary = corpora.Dictionary(processed_context)
+    context_corpus = [context_dictionary.doc2bow(doc) for doc in processed_context]
+
+    # Build the LDA model for the search context
+    context_lda_model = gensim.models.LdaMulticore(context_corpus, num_topics=5, id2word=context_dictionary, passes=20, workers=4)
+
+    # Get the topics
+    context_topics = context_lda_model.print_topics(num_words=5)  # Show top 5 words for each topic
+    print("Top Topics from the Search Results:")
+    for topic in context_topics:
+        print(topic)
