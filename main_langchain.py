@@ -1,12 +1,10 @@
 import os 
 import json
 import requests
-from flask import jsonify
-from langchain_core.prompts import PromptTemplate
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain.vectorstores import FAISS
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.schema import Document
 from translator import load_translation_pipeline, translate_forward, translate_backwards
 
@@ -58,8 +56,6 @@ embeddings = HuggingFaceEmbeddings(
 # Vector Stores
 db = FAISS.from_documents(documents, embeddings)
 
-question = "¿Dónde está el Vaticano?"
-
 def rag(question):
     searchDocs = db.similarity_search(question)
     print(searchDocs[0].page_content)
@@ -68,7 +64,7 @@ def rag(question):
     return searchDocs
 
 # Generate response from ollama
-def generate_response():
+def generate_response(question):
     searchDocs = rag(question)
     if searchDocs !=[]:
         context = "\n\n".join([doc.page_content for doc in searchDocs])
@@ -95,7 +91,8 @@ def generate_response():
                 {question_en}
 
                 ## Answer:
-                """.format(context=context, question_en=question_en)
+                """.format(context=context, question_en=question_en),
+            "stream": False,
         }
 
         url="http://kumo01:11434/api/generate"
@@ -105,14 +102,16 @@ def generate_response():
         try:
             response = requests.post(url, headers=headers, data=json.dumps(data))
             if response.status_code == 200:
-                print("Generated Response:\n", response.json())
+                print("Generated Response:\n", response.json()['response'])
                 final_response = translate_backwards(translator, response.json()['response'], lang)
                 print("Translated Response:\n", final_response)
-                return json.dump({'final_response': final_response})
+                return json.dumps({'final_response': final_response})
                 
             else:
                 return f"Error: {response.status_code}, {response.text}"
 
         except Exception as e:
             return f"An error occurred: {str(e)}"
-
+# question = "How many km2 does Vaticano City have?"
+# response = json.loads(generate_response(question))['final_response']
+# print('response: ', response)

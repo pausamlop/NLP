@@ -15,11 +15,11 @@ for msg in st.session_state.messages:
     else:
         st.chat_message(msg["role"], avatar="🤖").write(msg["content"])
 
-if prompt := st.chat_input():
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user", avatar="🧑‍💻").write(prompt)
+if question := st.chat_input():
+    st.session_state.messages.append({"role": "user", "content": question})
+    st.chat_message("user", avatar="🧑‍💻").write(question)
     st.session_state["full_message"] = ""
-    response = json.loads(generate_response['final_response'])
+    response = json.loads(generate_response(question))['final_response']
     print('response: ', response)
     st.chat_message("assistant", avatar="🤖").write_stream(response)
     st.session_state.messages.append({"role": "assistant", "content": st.session_state["full_message"]})  
