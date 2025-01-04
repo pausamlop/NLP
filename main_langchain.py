@@ -10,53 +10,46 @@ from translator import load_translation_pipeline, translate_forward, translate_b
 
 from topics import extract_topics
 
-# Load the document, split it into chunks, embed each chunk and load it into the vector store.
-folder_path = "./guides/"
-
-# Pipeline de traducción
-translator = load_translation_pipeline()
-
-documents = []
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
-
 class CustomTextLoader(TextLoader):
     def load(self):
         with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
             text = f.read()
         # Wrap the text content into a Document object
         return [Document(page_content=text)]
+        
+def initialization():
+    # Load the document, split it into chunks, embed each chunk and load it into the vector store.
+    folder_path = "./guides/"
+
+    # Pipeline de traducción
+    translator = load_translation_pipeline()
+
+    documents = []
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
+        
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        if os.path.isfile(file_path):
+            # Load the document
+            raw_documents = CustomTextLoader(file_path).load()
+            # Split the document into chunks
+            document = text_splitter.split_documents(raw_documents)
+            # Add the chunks to the main list
+            documents.extend(document)
+
+    # Initialize an instance of HuggingFaceEmbeddings with the specified parameters
+    embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-l6-v2",     # Provide the pre-trained model's path
+        model_kwargs={'device':'cpu'}, # Pass the model configuration options
+        encode_kwargs={'normalize_embeddings': False} # Pass the encoding options
+    )
+
+    # Vector Stores
+    db = FAISS.from_documents(documents, embeddings)
     
-for filename in os.listdir(folder_path):
-    file_path = os.path.join(folder_path, filename)
-    if os.path.isfile(file_path):
-        # Load the document
-        raw_documents = CustomTextLoader(file_path).load()
-        # Split the document into chunks
-        document = text_splitter.split_documents(raw_documents)
-        # Add the chunks to the main list
-        documents.extend(document)
+    return db, translator
 
-  
-# Define the path to the pre-trained model you want to use
-modelPath = "sentence-transformers/all-MiniLM-l6-v2"
-
-# Create a dictionary with model configuration options, specifying to use the CPU for computations
-model_kwargs = {'device':'cpu'}
-
-# Create a dictionary with encoding options, specifically setting 'normalize_embeddings' to False
-encode_kwargs = {'normalize_embeddings': False}
-
-# Initialize an instance of HuggingFaceEmbeddings with the specified parameters
-embeddings = HuggingFaceEmbeddings(
-    model_name=modelPath,     # Provide the pre-trained model's path
-    model_kwargs=model_kwargs, # Pass the model configuration options
-    encode_kwargs=encode_kwargs # Pass the encoding options
-)
-
-# Vector Stores
-db = FAISS.from_documents(documents, embeddings)
-
-def rag(question):
+def rag(question, db):
     searchDocs = db.similarity_search(question)
     print(searchDocs[0].page_content)
     print(searchDocs[1].page_content)
@@ -64,8 +57,8 @@ def rag(question):
     return searchDocs
 
 # Generate response from ollama
-def generate_response(question):
-    searchDocs = rag(question)
+def generate_response(question, db, translator):
+    searchDocs = rag(question, db)
     if searchDocs !=[]:
         context = "\n\n".join([doc.page_content for doc in searchDocs])
         extract_topics(context)
@@ -112,6 +105,7 @@ def generate_response(question):
 
         except Exception as e:
             return f"An error occurred: {str(e)}"
+        
 # question = "How many km2 does Vaticano City have?"
 # response = json.loads(generate_response(question))['final_response']
 # print('response: ', response)
