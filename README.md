@@ -1,1 +1,5 @@
-Before executing make sure en_core_web_sm is installed by using python -m spacy download es_core_news_sm
+Before execution
+conda create --name my_env
+conda activate my_env
+pip install -r requirements_v2.txt
+python -m spacy download es_core_news_md
