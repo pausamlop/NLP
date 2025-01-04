@@ -34,11 +34,11 @@ def translate_forward(translator, input):
         if lang.startswith(input_lang):
             input_lang = lang
 
-    if input_lang == "es_XX":
+    if input_lang == "en_XX":
         return input_lang, input
     
     # traducción   
-    output = translator(input, src_lang=input_lang, tgt_lang="es_XX",max_length = 1000)[0]["translation_text"]
+    output = translator(input, src_lang=input_lang, tgt_lang="en_XX",max_length = 1000)[0]["translation_text"]
 
     return input_lang, output
 
@@ -51,10 +51,10 @@ def translate_backwards(translator, input, language):
 
     input = input.replace("\n\n", "\n")
 
-    if language == "es_XX":
+    if language == "en_XX":
         return input
     
     # traducción   
-    output = translator(input, src_lang="es_XX", tgt_lang=language,max_length = 1000)[0]["translation_text"]
+    output = translator(input, src_lang="en_XX", tgt_lang=language,max_length = 1000)[0]["translation_text"]
 
     return output
