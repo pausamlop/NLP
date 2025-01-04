@@ -80,9 +80,10 @@ def generate_response():
         
         data = {
             "model": "llama3.1:8b-instruct-q8_0",
-            "system": "You are a helpful AI Assistant",
-            "prompt": PromptTemplate(template=
-                """Using the following context, answer the question. 
+            "system": "You are an expert travel assistant helping users plan trips and answer questions about destinations, museums, landmarks, cuisine, and more. Respond clearly, concisely, and based only on the provided context. Always reply in the same language as the question.",
+            "prompt": PromptTemplate(
+                template="""
+                    Act as an expert travel agency assistant. Provide clear and accurate answers strictly based on the provided context. Always reply in the same language as the question. Do not invent information.
 
                     ## Context:
                     {context}
@@ -92,10 +93,8 @@ def generate_response():
 
                     ## Answer:
                     """,
-                    input_variables=["context", "question_en"]
-                )
-,
-            "stream": False,
+                input_variables=["context", "question_en"]
+            )
         }
 
         url="http://kumo01:11434/api/generate"
