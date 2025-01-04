@@ -49,6 +49,8 @@ def translate_forward(translator, input):
 ##################################################
 def translate_backwards(translator, input, language):
 
+    input = input.replace("\n\n", "\n")
+
     if language == "es_XX":
         return input
     
