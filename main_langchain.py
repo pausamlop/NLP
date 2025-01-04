@@ -1,17 +1,15 @@
-
-
 import os 
+import json
+import gensim
+import spacy
+import requests
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.schema import Document
-import requests
-import json
-import gensim
 from translator import load_translation_pipeline, translate_forward, translate_backwards
 from gensim import corpora
-import spacy
 from gensim.parsing.preprocessing import STOPWORDS
 
 # Load the document, split it into chunks, embed each chunk and load it into the vector store.
