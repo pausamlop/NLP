@@ -81,20 +81,21 @@ def generate_response():
         data = {
             "model": "llama3.1:8b-instruct-q8_0",
             "system": "You are an expert travel assistant helping users plan trips and answer questions about destinations, museums, landmarks, cuisine, and more. Respond clearly, concisely, and based only on the provided context. Always reply in the same language as the question.",
-            "prompt": PromptTemplate(
-                template="""
-                    Act as an expert travel agency assistant. Provide clear and accurate answers strictly based on the provided context. Always reply in the same language as the question. Do not invent information.
+            "prompt":
+                """Using the following context, answer the question. 
+                Act as an expert travel agency assistant. 
+                Provide clear and accurate answers strictly based on the provided context. 
+                Always reply in the same language as the question.
 
-                    ## Context:
-                    {context}
 
-                    ## Question:
-                    {question_en}
+                ## Context:
+                {context}
 
-                    ## Answer:
-                    """,
-                input_variables=["context", "question_en"]
-            )
+                ## Question:
+                {question_en}
+
+                ## Answer:
+                """.format(context=context, question_en=question_en)
         }
 
         url="http://kumo01:11434/api/generate"
@@ -104,10 +105,10 @@ def generate_response():
         try:
             response = requests.post(url, headers=headers, data=json.dumps(data))
             if response.status_code == 200:
-                print("Generated Response:\n", final_response)
-                final_response = translate_backwards(translator, response['response'], lang)
+                print("Generated Response:\n", response.json())
+                final_response = translate_backwards(translator, response.json()['response'], lang)
                 print("Translated Response:\n", final_response)
-                return jsonify({'final_response': final_response})
+                return json.dump({'final_response': final_response})
                 
             else:
                 return f"Error: {response.status_code}, {response.text}"
