@@ -15,5 +15,5 @@ Run app:
 
 which streamlit -> PATH
 
-python <PATH> run app.py
+python PATH run app.py
 
