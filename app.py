@@ -2,6 +2,7 @@ import streamlit as st
 import ollama
 import json
 from main_langchain import initialization, generate_response
+from summarizer import load_summarization_pipeline, summarize
 
 st.title(" AI Travel Guide")
 
@@ -44,6 +45,20 @@ if question := st.chat_input():
    # print('summary: ', summary)
     st.chat_message("assistant", avatar="烙").write(response)
     st.session_state.messages.append({"role": "assistant", "content": response}) 
+
+    # Preguntar al usuario si desea un resumen
+    if st.button("Would you like a summary of the document?"):
+        with st.spinner("Generating summary..."):
+            # Crear un documento simulado para resumir
+            from langchain.schema import Document
+            document = [Document(page_content=context)]
+
+            # Llamar a la función summarize
+            summarizer2 = load_summarization_pipeline()
+            summary = summarize(summarizer2, document)
+            
+            st.chat_message("assistant", avatar="烙").write(f"Here is the summary:\n\n{summary}")
+            st.session_state.messages.append({"role": "assistant", "content": summary})
 
 with st.sidebar:
     st.subheader("Last 5 questions")
