@@ -3,10 +3,13 @@ import ollama
 import json
 from main_langchain import initialization, generate_response
 
-st.title("💬 AI Travel Guide")
+st.title(" AI Travel Guide")
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
+
+if "last_questions" not in st.session_state:
+    st.session_state["last_questions"] = []
 
 # Inicializar db y translator si no están definidos
 if "db" not in st.session_state or "translator" not in st.session_state:
@@ -18,13 +21,13 @@ if "db" not in st.session_state or "translator" not in st.session_state:
 ### Write Message History
 for msg in st.session_state.messages:
     if msg["role"] == "user":
-        st.chat_message(msg["role"], avatar="🧑‍💻").write(msg["content"])
+        st.chat_message(msg["role"], avatar="六‍").write(msg["content"])
     else:
-        st.chat_message(msg["role"], avatar="🤖").write(msg["content"])
+        st.chat_message(msg["role"], avatar="烙").write(msg["content"])
 
 if question := st.chat_input():
     st.session_state.messages.append({"role": "user", "content": question})
-    st.chat_message("user", avatar="🧑‍💻").write(question)
+    st.chat_message("user", avatar="六‍").write(question)
     # Acceder a db y translator desde session_state
     db = st.session_state["db"]
     translator = st.session_state["translator"]
@@ -32,8 +35,25 @@ if question := st.chat_input():
     output = generate_response(question, db, translator)
     response = json.loads(output)['final_response']
     context = json.loads(output)['context']
+    # Agregar la pregunta al historial
+    st.session_state["last_questions"].append(question)
+    # Limitar el historial a las últimas 5 preguntas
+    st.session_state["last_questions"] = st.session_state["last_questions"][-5:]
 
    # print('response: ', response)
    # print('summary: ', summary)
-    st.chat_message("assistant", avatar="🤖").write(response)
+    st.chat_message("assistant", avatar="烙").write(response)
     st.session_state.messages.append({"role": "assistant", "content": response}) 
+
+with st.sidebar:
+    st.subheader("Last 5 questions")
+    for i, past_question in enumerate(st.session_state["last_questions"]):
+        if st.button(f"Resend: {past_question}", key=f"resend_{i}"):
+            st.session_state.messages.append({"role": "user", "content": past_question})
+            db = st.session_state["db"]
+            translator = st.session_state["translator"]
+            summarizer = st.session_state["summarizer"]
+            output = generate_response(past_question, db, translator)
+            response = json.loads(output)['final_response']
+            st.chat_message("assistant", avatar="烙").write(response)
+            st.session_state.messages.append({"role": "assistant", "content": response}) 
