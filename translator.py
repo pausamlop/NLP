@@ -8,7 +8,7 @@ from langdetect import detect
 ##################################################
 def load_translation_pipeline():
 
-    translator = pipeline(task="translation", model="facebook/mbart-large-50-many-to-many-mmt")
+    translator = pipeline(task="translation", model="facebook/mbart-large-50-many-to-many-mmt", use_fast=False)
     return translator
 
 
@@ -50,11 +50,13 @@ def translate_forward(translator, input):
 def translate_backwards(translator, input, language):
 
     input = input.replace("\n\n", "\n")
+    translate_input_lang = detect(input)
+    print('translate_input_lang: ', translate_input_lang)
 
-    if language == "en_XX":
+    if translate_input_lang == "en_XX":
         return input
     
     # traducción   
-    output = translator(input, src_lang="en_XX", tgt_lang=language,max_length = 1000)[0]["translation_text"]
-
+    output = translator(input, src_lang="es_XX", tgt_lang=language,max_length = 1000)[0]["translation_text"]
+    
     return output

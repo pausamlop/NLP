@@ -11,9 +11,15 @@ python -m spacy download es_core_news_md
 pip install -U langchain-huggingface
 
 
+-------------------------------------------------------
+(conda env export > streamlit-env.yml)
+
+conda env create -f streamlit-env.yml
+
+(conda remove -n streamlit-env --all)
+
+
 Run app:
 
-which streamlit -> PATH
-
-python PATH run app.py
+streamlit run app.py
 

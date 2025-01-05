@@ -24,11 +24,10 @@ for msg in st.session_state.messages:
 if question := st.chat_input():
     st.session_state.messages.append({"role": "user", "content": question})
     st.chat_message("user", avatar="🧑‍💻").write(question)
-    st.session_state["full_message"] = ""
     # Acceder a db y translator desde session_state
     db = st.session_state["db"]
     translator = st.session_state["translator"]
     response = json.loads(generate_response(question, db, translator))['final_response']
     print('response: ', response)
     st.chat_message("assistant", avatar="🤖").write(response)
-    st.session_state.messages.append({"role": "assistant", "content": st.session_state["full_message"]})  
+    st.session_state.messages.append({"role": "assistant", "content": response}) 

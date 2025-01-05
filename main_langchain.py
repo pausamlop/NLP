@@ -7,8 +7,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.schema import Document
 from translator import load_translation_pipeline, translate_forward, translate_backwards
-
-from topics import extract_topics
+# from topics import extract_topics
 
 class CustomTextLoader(TextLoader):
     def load(self):
@@ -61,11 +60,11 @@ def generate_response(question, db, translator):
     searchDocs = rag(question, db)
     if searchDocs !=[]:
         context = "\n\n".join([doc.page_content for doc in searchDocs])
-        extract_topics(context)
+        # extract_topics(context)
 
         # traducción
-        lang, question_en = translate_forward(translator, question)
-        print(lang)
+        input_lang, question_en = translate_forward(translator, question)
+        print(input_lang)
         
         data = {
             "model": "llama3.1:8b-instruct-q8_0",
@@ -96,7 +95,7 @@ def generate_response(question, db, translator):
             response = requests.post(url, headers=headers, data=json.dumps(data))
             if response.status_code == 200:
                 print("Generated Response:\n", response.json()['response'])
-                final_response = translate_backwards(translator, response.json()['response'], lang)
+                final_response = translate_backwards(translator, response.json()['response'], input_lang)
                 print("Translated Response:\n", final_response)
                 return json.dumps({'final_response': final_response})
                 
