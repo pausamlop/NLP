@@ -10,9 +10,10 @@ if "messages" not in st.session_state:
 
 # Inicializar db y translator si no están definidos
 if "db" not in st.session_state or "translator" not in st.session_state:
-    db, translator = initialization()
+    db, translator, summarizer = initialization()
     st.session_state["db"] = db
     st.session_state["translator"] = translator
+    st.session_state["summarizer"] = summarizer
 
 ### Write Message History
 for msg in st.session_state.messages:
@@ -27,7 +28,12 @@ if question := st.chat_input():
     # Acceder a db y translator desde session_state
     db = st.session_state["db"]
     translator = st.session_state["translator"]
-    response = json.loads(generate_response(question, db, translator))['final_response']
-    print('response: ', response)
+    summarizer = st.session_state["summarizer"]
+    output = generate_response(question, db, translator)
+    response = json.loads(output)['final_response']
+    context = json.loads(output)['context']
+
+   # print('response: ', response)
+   # print('summary: ', summary)
     st.chat_message("assistant", avatar="🤖").write(response)
     st.session_state.messages.append({"role": "assistant", "content": response}) 

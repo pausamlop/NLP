@@ -50,13 +50,13 @@ def translate_forward(translator, input):
 def translate_backwards(translator, input, language):
 
     input = input.replace("\n\n", "\n")
-    translate_input_lang = detect(input)
-    print('translate_input_lang: ', translate_input_lang)
 
-    if translate_input_lang == "en_XX":
+    if language == "en_XX":
         return input
     
+    print("im translating back to ", language)
+    
     # traducción   
-    output = translator(input, src_lang="es_XX", tgt_lang=language,max_length = 1000)[0]["translation_text"]
+    output = translator(input, src_lang="en_XX", tgt_lang=language,max_length = 1000)[0]["translation_text"]
     
     return output

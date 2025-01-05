@@ -7,6 +7,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.schema import Document
 from translator import load_translation_pipeline, translate_forward, translate_backwards
+from summarizer import load_summarization_pipeline
 # from topics import extract_topics
 
 class CustomTextLoader(TextLoader):
@@ -22,6 +23,9 @@ def initialization():
 
     # Pipeline de traducción
     translator = load_translation_pipeline()
+
+    # Pipeline de resumen 
+    summarizer = load_summarization_pipeline()
 
     documents = []
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
@@ -46,7 +50,7 @@ def initialization():
     # Vector Stores
     db = FAISS.from_documents(documents, embeddings)
     
-    return db, translator
+    return db, translator, summarizer
 
 def rag(question, db):
     searchDocs = db.similarity_search(question)
@@ -97,7 +101,8 @@ def generate_response(question, db, translator):
                 print("Generated Response:\n", response.json()['response'])
                 final_response = translate_backwards(translator, response.json()['response'], input_lang)
                 print("Translated Response:\n", final_response)
-                return json.dumps({'final_response': final_response})
+
+                return json.dumps({'final_response': final_response, 'context': context})
                 
             else:
                 return f"Error: {response.status_code}, {response.text}"
