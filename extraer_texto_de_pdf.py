@@ -5,8 +5,10 @@ import pdfplumber
 #Se descarga el PDF desde la URL y se guarda localmente
 urls = [
     "https://www.grupomasviajes.com/GuiasViaje/GuiaViajeBARCELONA.pdf",
+    "https://www.grupomasviajes.com/GuiasViaje/GuiaViajeLOSANGELES.pdf",
+    "https://www.grupomasviajes.com/GuiasViaje/GuiaViajePARIS.pdf",
     "https://www.grupomasviajes.com/guiasviaje/GuiaViajeROMA.pdf",
-    "https://www.grupomasviajes.com/GuiasViaje/GuiaViajeLONDRES.pdf",
+    "https://www.grupomasviajes.com/GuiasViaje/GuiaViajeZURICH.pdf",
 ]
 output_path = "guides/"
 # Download and extract content

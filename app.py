@@ -4,7 +4,7 @@ import json
 from main_langchain import initialization, generate_response
 from summarizer import load_summarization_pipeline, summarize
 
-st.title(" AI Travel Guide")
+st.title("💬 AI Travel Guide")
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
@@ -22,13 +22,13 @@ if "db" not in st.session_state or "translator" not in st.session_state:
 ### Write Message History
 for msg in st.session_state.messages:
     if msg["role"] == "user":
-        st.chat_message(msg["role"], avatar="六‍").write(msg["content"])
+        st.chat_message(msg["role"], avatar="🧑‍💻").write(msg["content"])
     else:
-        st.chat_message(msg["role"], avatar="烙").write(msg["content"])
+        st.chat_message(msg["role"], avatar="🤖").write(msg["content"])
 
 if question := st.chat_input():
     st.session_state.messages.append({"role": "user", "content": question})
-    st.chat_message("user", avatar="六‍").write(question)
+    st.chat_message("user", avatar="🧑‍💻").write(question)
     # Acceder a db y translator desde session_state
     db = st.session_state["db"]
     translator = st.session_state["translator"]
@@ -43,7 +43,7 @@ if question := st.chat_input():
 
    # print('response: ', response)
    # print('summary: ', summary)
-    st.chat_message("assistant", avatar="烙").write(response)
+    st.chat_message("assistant", avatar="🤖").write(response)
     st.session_state.messages.append({"role": "assistant", "content": response}) 
 
     # Preguntar al usuario si desea un resumen
@@ -57,7 +57,7 @@ if question := st.chat_input():
             summarizer2 = load_summarization_pipeline()
             summary = summarize(summarizer2, document)
             
-            st.chat_message("assistant", avatar="烙").write(f"Here is the summary:\n\n{summary}")
+            st.chat_message("assistant", avatar="🤖").write(f"Here is the summary:\n\n{summary}")
             st.session_state.messages.append({"role": "assistant", "content": summary})
 
 with st.sidebar:
@@ -70,5 +70,5 @@ with st.sidebar:
             summarizer = st.session_state["summarizer"]
             output = generate_response(past_question, db, translator)
             response = json.loads(output)['final_response']
-            st.chat_message("assistant", avatar="烙").write(response)
+            st.chat_message("assistant", avatar="🤖").write(response)
             st.session_state.messages.append({"role": "assistant", "content": response}) 
