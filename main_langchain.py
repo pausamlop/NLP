@@ -102,7 +102,7 @@ def generate_response(question, db, translator):
                 final_response = translate_backwards(translator, response.json()['response'], input_lang)
                 print("Translated Response:\n", final_response)
 
-                return json.dumps({'final_response': final_response, 'context': context})
+                return json.dumps({'final_response': final_response, 'context': context, 'input_lang': input_lang})
                 
             else:
                 return f"Error: {response.status_code}, {response.text}"

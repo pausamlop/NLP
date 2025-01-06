@@ -2,7 +2,9 @@ import streamlit as st
 import ollama
 import json
 from main_langchain import initialization, generate_response
-from summarizer import load_summarization_pipeline, summarize
+from translator import translate_backwards
+from summarizer import summarize
+from langchain.schema import Document
 
 st.title("💬 AI Travel Guide")
 
@@ -36,29 +38,38 @@ if question := st.chat_input():
     output = generate_response(question, db, translator)
     response = json.loads(output)['final_response']
     context = json.loads(output)['context']
+    st.session_state["context"] = context
+    input_lang = json.loads(output)['input_lang']
+    st.session_state["input_lang"] = input_lang
+    
     # Agregar la pregunta al historial
     st.session_state["last_questions"].append(question)
     # Limitar el historial a las últimas 5 preguntas
     st.session_state["last_questions"] = st.session_state["last_questions"][-5:]
-
-   # print('response: ', response)
-   # print('summary: ', summary)
+    
     st.chat_message("assistant", avatar="🤖").write(response)
     st.session_state.messages.append({"role": "assistant", "content": response}) 
 
+    # Enable the summary button
+    st.session_state["show_summary_button"] = True
+    
+
+if st.session_state.get("show_summary_button"):
+    translator = st.session_state["translator"]
     # Preguntar al usuario si desea un resumen
-    if st.button("Would you like a summary of the document?"):
+    summary_question = translate_backwards(translator, "Would you like a summary of the document?", st.session_state['input_lang'])
+    if st.button(summary_question):
         with st.spinner("Generating summary..."):
             # Crear un documento simulado para resumir
-            from langchain.schema import Document
-            document = [Document(page_content=context)]
+            document = [Document(page_content=st.session_state["context"])]
 
             # Llamar a la función summarize
-            summarizer2 = load_summarization_pipeline()
-            summary = summarize(summarizer2, document)
+            summarizer = st.session_state["summarizer"]
+            summary = summarize(summarizer, document)
+            translated_summary = translate_backwards(translator, summary, st.session_state['input_lang'])
             
-            st.chat_message("assistant", avatar="🤖").write(f"Here is the summary:\n\n{summary}")
-            st.session_state.messages.append({"role": "assistant", "content": summary})
+            st.chat_message("assistant", avatar="🤖").write(f"Here is the summary:\n\n{translated_summary}")
+            st.session_state.messages.append({"role": "assistant", "content": translated_summary})
 
 with st.sidebar:
     st.subheader("Last 5 questions")
@@ -72,3 +83,4 @@ with st.sidebar:
             response = json.loads(output)['final_response']
             st.chat_message("assistant", avatar="🤖").write(response)
             st.session_state.messages.append({"role": "assistant", "content": response}) 
+
