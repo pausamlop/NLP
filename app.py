@@ -77,7 +77,7 @@ if question := st.chat_input():
     response_with_references = response
     if documents:
         file_path = documents[0].get('source_url', '') 
-        file_path = file_path.replace("./guides", "static/guides")  # Cambia la ruta para usar "static/guides"
+        file_path = file_path.replace("./guides", "/app/static/guides")  # Cambia la ruta para usar "static/guides"
         
         # Traducir la parte del mensaje según el idioma de la pregunta
         translation_message = "You can find more information in the [file]({})".format(file_path)
