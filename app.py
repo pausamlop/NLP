@@ -7,7 +7,23 @@ from summarizer import summarize
 from langchain.schema import Document
 from audio import language_supported, play_audio
 
+places_info = [
+    {"name": "Barcelona", "emoji": "🏖️"},
+    {"name": "Los Angeles", "emoji": "🌴"},
+    {"name": "Paris", "emoji": "🗼"},
+    {"name": "Rome", "emoji": "🏛️"},
+    {"name": "Zurich", "emoji": "🏔️"},
+]
+
 st.title("💬 AI Travel Guide")
+
+st.subheader("🌍 Places we have information about:")
+cols = st.columns(len(places_info)) 
+
+for col, place in zip(cols, places_info):
+    with col:
+        st.markdown(f"{place['emoji']} {place['name']}")
+
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
@@ -86,7 +102,7 @@ if st.session_state.get("show_play_button"):
         play_audio(response, input_lang)
 
 with st.sidebar:
-    st.subheader("Last 5 questions")
+    st.subheader("Last 5 questions 📝")
     for i, past_question in enumerate(st.session_state["last_questions"]):
         if st.button(f"Resend: {past_question}", key=f"resend_{i}"):
             st.session_state.messages.append({"role": "user", "content": past_question})
