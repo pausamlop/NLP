@@ -107,7 +107,7 @@ if st.session_state.get("show_summary_button"):
 # Reproducir la respuesta
 if st.session_state.get("show_play_button"): 
     input_lang = st.session_state["input_lang"]
-    play_question = translate_backwards(translator, "Would you like to play the answer?", input_lang)
+    play_question = translate_backwards(translator, "Would you like me to read the answer out loud?", input_lang)
     if st.button(play_question):
         response = st.session_state["response"]
         play_audio(response, input_lang)
