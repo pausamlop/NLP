@@ -64,7 +64,10 @@ for i, url in enumerate(urls):
         txt_file.write(all_text)
 
     # Agregar texto a la lista de documentos
-    documents.append(all_text)
+    documents.append({
+    "text": all_text,
+    "source_url": url  # Aquí se guarda la URL de donde proviene el PDF
+    })
 
 ###############################################################################
 # Crear base de datos vectorial con ChromaDB
@@ -79,7 +82,8 @@ for i, doc in enumerate(documents):
     collection.add(
         ids=[str(i)],
         embeddings=[embedding],
-        documents=[doc]
+        documents=[doc[text]],
+        metadatas=[{"source_url": doc["source_url"]}]
     )
 
 print("Todos los documentos han sido indexados correctamente.")
@@ -112,7 +116,6 @@ if len(results['documents']) > 0:
     answer = translate_backwards(translator, answer[:1024], lang)
 else:
     print("Lo siento, no encontré información relevante para tu pregunta.")
-
 
 data = results['documents'][0][0]
 print("Documento más relevante:")

@@ -35,10 +35,13 @@ def initialization():
         if os.path.isfile(file_path):
             # Load the document
             raw_documents = CustomTextLoader(file_path).load()
-            # Split the document into chunks
-            document = text_splitter.split_documents(raw_documents)
-            # Add the chunks to the main list
-            documents.extend(document)
+            # Dividir el documento en fragmentos
+            document_chunks = text_splitter.split_documents(raw_documents)
+            # Añadir la ruta del archivo como metadato en cada fragmento
+            for chunk in document_chunks:
+                chunk.metadata['source'] = file_path  # Aquí agregamos la ruta al metadato 'source
+            # Añadir los fragmentos a la lista
+            documents.extend(document_chunks)
 
     # Initialize an instance of HuggingFaceEmbeddings with the specified parameters
     embeddings = HuggingFaceEmbeddings(
@@ -65,6 +68,8 @@ def generate_response(question, db, translator):
     if searchDocs !=[]:
         context = "\n\n".join([doc.page_content for doc in searchDocs])
         # extract_topics(context)
+        # Recoger las URLs de los documentos relevantes
+        documents = [{"source_url": doc.metadata.get("source")} for doc in searchDocs if 'source' in doc.metadata]
 
         # traducción
         input_lang, question_en = translate_forward(translator, question)
@@ -102,8 +107,13 @@ def generate_response(question, db, translator):
                 final_response = translate_backwards(translator, response.json()['response'], input_lang)
                 print("Translated Response:\n", final_response)
 
-                return json.dumps({'final_response': final_response, 'context': context, 'input_lang': input_lang})
-                
+                return json.dumps({
+                    'final_response': final_response,
+                    'context': context,
+                    'input_lang': input_lang,
+                    'documents': documents
+                })
+            
             else:
                 return f"Error: {response.status_code}, {response.text}"
 

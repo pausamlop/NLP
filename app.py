@@ -8,23 +8,21 @@ from langchain.schema import Document
 from audio import language_supported, play_audio
 import time
 
-places_info = [
-    {"name": "Barcelona", "emoji": "🏖️"},
-    {"name": "Los Angeles", "emoji": "🌴"},
-    {"name": "Paris", "emoji": "🗼"},
-    {"name": "Rome", "emoji": "🏛️"},
-    {"name": "Zurich", "emoji": "🏔️"},
-]
+places_info =[ 
+    {"name": "Barcelona", "emoji": "🏖"}, 
+    {"name": "Los Angeles", "emoji": "🌴"}, 
+    {"name": "Paris", "emoji": "🗼"}, 
+    {"name": "Rome", "emoji": "🏛"}, 
+    {"name": "Zurich", "emoji": "⛰"}, 
+] 
 
 st.title("💬 AI Travel Guide")
 
-st.subheader("🌍 Places we have information about:")
-cols = st.columns(len(places_info)) 
-
-for col, place in zip(cols, places_info):
+st.subheader("🌎 Places I have information about:") 
+cols = st.columns(len(places_info))
+for col, place in zip (cols, places_info):
     with col:
         st.markdown(f"{place['emoji']} {place['name']}")
-
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
@@ -52,7 +50,7 @@ if question := st.chat_input():
 
     # Medir el tiempo de generación de la respuesta
     start_time = time.time()  # Tiempo inicial
-    
+
     # Acceder a db y translator desde session_state
     db = st.session_state["db"]
     translator = st.session_state["translator"]
@@ -61,23 +59,32 @@ if question := st.chat_input():
 
     end_time = time.time()  # Tiempo final
     elapsed_time = end_time - start_time  # Calcular tiempo transcurrido
-    
+
     response = json.loads(output)['final_response']
     st.session_state["response"] = response
     context = json.loads(output)['context']
     st.session_state["context"] = context
     input_lang = json.loads(output)['input_lang']
     st.session_state["input_lang"] = input_lang
+    documents = json.loads(output)['documents']
     
     # Agregar la pregunta al historial
     st.session_state["last_questions"].append(question)
     # Limitar el historial a las últimas 5 preguntas
     st.session_state["last_questions"] = st.session_state["last_questions"][-5:]
-    
-    st.chat_message("assistant", avatar="🤖").write(response)
-    st.session_state.messages.append({"role": "assistant", "content": response}) 
 
-    st.caption(f"⏱️ Response generated in {elapsed_time:.2f} seconds.")
+    # Generar respuesta con referencias
+    response_with_references = response
+    if documents:
+        file_path = documents[0].get('source_url', '')  # Suponiendo que documents contiene solo URLs
+        relative_file_path = f"/static/guides/{file_path.split('/')[-1]}"
+        response_with_references += f"\n\nYou can find more information in the [file]({relative_file_path})"
+
+    
+    st.chat_message("assistant", avatar="🤖").write(response_with_references)
+    st.session_state.messages.append({"role": "assistant", "content": response_with_references})
+
+    st.caption(f"⏱️ Response generated in {elapsed_time:.2f} seconds.") 
 
     # Enable the summary button
     st.session_state["show_summary_button"] = True
@@ -113,7 +120,7 @@ if st.session_state.get("show_play_button"):
         play_audio(response, input_lang)
 
 with st.sidebar:
-    st.subheader("Last 5 questions 📝")
+    st.subheader("Last 5 questions 📋")
     for i, past_question in enumerate(st.session_state["last_questions"]):
         if st.button(f"Resend: {past_question}", key=f"resend_{i}"):
             st.session_state.messages.append({"role": "user", "content": past_question})
