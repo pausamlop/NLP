@@ -6,6 +6,7 @@ from translator import translate_backwards
 from summarizer import summarize
 from langchain.schema import Document
 from audio import language_supported, play_audio
+import time
 
 places_info = [
     {"name": "Barcelona", "emoji": "🏖️"},
@@ -48,11 +49,19 @@ for msg in st.session_state.messages:
 if question := st.chat_input():
     st.session_state.messages.append({"role": "user", "content": question})
     st.chat_message("user", avatar="🧑‍💻").write(question)
+
+    # Medir el tiempo de generación de la respuesta
+    start_time = time.time()  # Tiempo inicial
+    
     # Acceder a db y translator desde session_state
     db = st.session_state["db"]
     translator = st.session_state["translator"]
     summarizer = st.session_state["summarizer"]
     output = generate_response(question, db, translator)
+
+    end_time = time.time()  # Tiempo final
+    elapsed_time = end_time - start_time  # Calcular tiempo transcurrido
+    
     response = json.loads(output)['final_response']
     st.session_state["response"] = response
     context = json.loads(output)['context']
@@ -67,6 +76,8 @@ if question := st.chat_input():
     
     st.chat_message("assistant", avatar="🤖").write(response)
     st.session_state.messages.append({"role": "assistant", "content": response}) 
+
+    st.caption(f"⏱️ Response generated in {elapsed_time:.2f} seconds.")
 
     # Enable the summary button
     st.session_state["show_summary_button"] = True
