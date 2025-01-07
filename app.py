@@ -5,6 +5,7 @@ from main_langchain import initialization, generate_response
 from translator import translate_backwards
 from summarizer import summarize
 from langchain.schema import Document
+from audio import language_supported, play_audio
 
 st.title("💬 AI Travel Guide")
 
@@ -37,6 +38,7 @@ if question := st.chat_input():
     summarizer = st.session_state["summarizer"]
     output = generate_response(question, db, translator)
     response = json.loads(output)['final_response']
+    st.session_state["response"] = response
     context = json.loads(output)['context']
     st.session_state["context"] = context
     input_lang = json.loads(output)['input_lang']
@@ -52,6 +54,10 @@ if question := st.chat_input():
 
     # Enable the summary button
     st.session_state["show_summary_button"] = True
+
+    # añadir audio
+    if language_supported(input_lang):
+        st.session_state["show_play_button"] = True
     
 
 if st.session_state.get("show_summary_button"):
@@ -70,6 +76,14 @@ if st.session_state.get("show_summary_button"):
             
             st.chat_message("assistant", avatar="🤖").write(f"Here is the summary:\n\n{translated_summary}")
             st.session_state.messages.append({"role": "assistant", "content": translated_summary})
+
+# Reproducir la respuesta
+if st.session_state.get("show_play_button"): 
+    input_lang = st.session_state["input_lang"]
+    play_question = translate_backwards(translator, "Would you like to play the answer?", input_lang)
+    if st.button(play_question):
+        response = st.session_state["response"]
+        play_audio(response, input_lang)
 
 with st.sidebar:
     st.subheader("Last 5 questions")
