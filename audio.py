@@ -28,16 +28,4 @@ def play_audio(text, language):
     audio.play()
 
     return
-
-
-# añadir audio
-    if language_supported(input_lang):
-        st.session_state["show_play_button"] = True
-
-# Reproducir la respuesta
-if st.session_state.get("show_play_button"): 
-    input_lang = st.session_state["input_lang"]
-    play_question = translate_backwards(translator, "Would you like to play the answer?", input_lang)
-    if st.button(play_question):
-        response = st.session_state["response"]
-        play_audio(response, input_lang)
+    
