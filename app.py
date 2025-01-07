@@ -76,9 +76,17 @@ if question := st.chat_input():
     # Generar respuesta con referencias
     response_with_references = response
     if documents:
-        file_path = documents[0].get('source_url', '')  # Suponiendo que documents contiene solo URLs
-        relative_file_path = f"/static/guides/{file_path.split('/')[-1]}"
-        response_with_references += f"\n\nYou can find more information in the [file]({relative_file_path})"
+        file_path = documents[0].get('source_url', '') 
+        file_path = file_path.replace("./guides", "static/guides")  # Cambia la ruta para usar "static/guides"
+        
+        # Traducir la parte del mensaje según el idioma de la pregunta
+        translation_message = "You can find more information in the [file]({})".format(file_path)
+
+        # Traducir al idioma de la pregunta
+        translated_message = translate_backwards(translator, translation_message, input_lang)
+        
+        # Agregar el mensaje traducido a la respuesta
+        response_with_references += f"\n\n{translated_message}"
 
     
     st.chat_message("assistant", avatar="🤖").write(response_with_references)
@@ -131,4 +139,3 @@ with st.sidebar:
             response = json.loads(output)['final_response']
             st.chat_message("assistant", avatar="🤖").write(response)
             st.session_state.messages.append({"role": "assistant", "content": response}) 
-
