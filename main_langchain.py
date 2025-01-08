@@ -118,6 +118,8 @@ def generate_response(question, db, translator):
 
                 ## Answer:
                 """.format(context=context, question_en=question_en),
+            "temperature": 0.6,
+            "top_p":0.9,
             "stream": False,
         }
 
