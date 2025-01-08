@@ -17,9 +17,10 @@ A parte de responder preguntas, se han implementado las siguientes funcionalidad
 
 ## Ejecución
 
-Para correr la aplicación, ejecutar
+Para correr la aplicación, ejecutar:
 
+~~~
 conda env create -f streamlit-env.yml
 conda activate streamlit-env
 streamlit run app.py
-
+~~~
