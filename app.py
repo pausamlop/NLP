@@ -139,16 +139,16 @@ if st.session_state.get("show_play_button"):
 # Mostrar preguntas sugeridas basadas en temas clave
 if st.session_state.get("suggest_questions"):
     st.write(translate_backwards(translator, "Questions Suggested:", st.session_state["input_lang"]))
-    topics = extract_top_keywords(translate_forward(st.session_state['translator'], st.session_state['response'])[1])
+    translator=st.session_state['translator']
+    topics = extract_top_keywords(translate_forward(translator, st.session_state['response'])[1])
     suggested_questions = generate_question_from_context(topics)
     translated_question = translate_backwards(translator, suggested_questions, st.session_state['input_lang'])
-    st.write(suggested_questions)
+
+    st.write(translated_question)
     if st.button('Ask question'):
-        st.session_state.messages.append({"role": "user", "content": suggested_questions})
-        st.chat_message("user", avatar="🧑‍💻").write(suggested_questions)
+        st.session_state.messages.append({"role": "user", "content": translated_question})
+        st.chat_message("user", avatar="🧑‍💻").write(translated_question)
         db = st.session_state["db"]
-        translator = st.session_state["translator"]
-        summarizer = st.session_state["summarizer"]
         output = generate_response(suggested_questions, db, translator)
         response = json.loads(output)['final_response']
         st.chat_message("assistant", avatar="🤖").write(response)

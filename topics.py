@@ -60,7 +60,7 @@ def generate_question_from_context(topics):
 
                 ## Answer:
                 """.format(topics=topics),
-            "temperature:0.6,
+            "temperature":0.6,
             "top_p":0.9,
             "stream": False,
         }
