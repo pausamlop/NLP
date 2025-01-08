@@ -1,25 +1,25 @@
-Before execution
+# Asignatura de Procesamiento del Lenguaje Natural
 
-conda create --name my_env
+- Camino Rodríguez
+- Natalia Centeno
+- Lucía Yan 
+- Paula Samper
+  
+## Chatbot para responder preguntas de una base de datos documental de guías de viajes
 
-conda activate my_env
+EL chatbot responde preguntas sobre Barcelona, Los Ángeles, París, Roma y Zurich según la información que encuentra en una serie de guías de viaje.
+A parte de responder preguntas, se han implementado las siguientes funcionalidades adicionales:
+- Generación de resúmenes opcionales de los documentos de los que se extrae la información
+- Traducción (+50 idiomas) para que la comunicación se haga en el idioma que utilice el usuario.
+- Sugerencias de preguntas personalizadas.
+- Historial de preguntas.
+- Leer la respuesta en voz alta en el idioma de entrada (siempre que el idioma esté soportado).
 
-pip install -r requirements_v2.txt
+## Ejecución
 
-python -m spacy download es_core_news_md
-
-pip install -U langchain-huggingface
-
-
--------------------------------------------------------
-(conda env export > streamlit-env.yml)
+Para correr la aplicación, ejecutar
 
 conda env create -f streamlit-env.yml
-
-(conda remove -n streamlit-env --all)
-
-
-Run app:
-
+conda activate streamlit-env
 streamlit run app.py
 
