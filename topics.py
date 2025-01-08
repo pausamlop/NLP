@@ -4,8 +4,6 @@ import json
 import requests
 from gensim import corpora
 from gensim.parsing.preprocessing import STOPWORDS
-from langchain.schema import Document
-from transformers import pipeline
 
 
 # Cargar el modelo de spaCy en español
@@ -40,7 +38,7 @@ def extract_top_keywords(context):
     return top_keywords
 
     
-def generate_question_from_context(topics, translator):
+def generate_question_from_context(topics):
     
     data = {
             "model": "llama3.1:8b-instruct-q8_0",
@@ -62,8 +60,6 @@ def generate_question_from_context(topics, translator):
         response = requests.post(url, headers=headers, data=json.dumps(data))
         if response.status_code == 200:
             print("Generated Response:\n", response.json()['response'])
-            final_response = translate_backwards(translator, response.json()['response'], input_lang)
-            print("Translated Response:\n", final_response)
             return response.json()['response']
         
         else:

@@ -104,9 +104,7 @@ if question := st.chat_input():
         st.session_state["show_play_button"] = True
 
     # Mostrar sugerencias
-    topics = extract_top_keywords(st.session_state['response'])
-    suggested_questions = generate_question_from_context(topics, st.session_state['translator'])
-    st.write(suggested_questions)
+    st.session_state["suggest_questions"] = True
 
 if st.session_state.get("show_summary_button"):
     translator = st.session_state["translator"]
@@ -132,6 +130,21 @@ if st.session_state.get("show_play_button"):
     if st.button(play_question):
         response = st.session_state["response"]
         play_audio(response, input_lang)
+
+if st.session_state.get("suggest_questions"):
+    topics = extract_top_keywords(st.session_state['response'])
+    suggested_questions = generate_question_from_context(topics)
+    # translated_question = translate_backwards(translator, suggested_questions, st.session_state['input_lang'])
+    if st.button(suggested_questions):
+        st.session_state.messages.append({"role": "user", "content": suggested_questions})
+        db = st.session_state["db"]
+        translator = st.session_state["translator"]
+        summarizer = st.session_state["summarizer"]
+        output = generate_response(suggested_questions, db, translator)
+        response = json.loads(output)['final_response']
+        st.chat_message("assistant", avatar="🤖").write(response)
+        st.session_state.messages.append({"role": "assistant", "content": response}) 
+
 
 with st.sidebar:
     st.subheader("Last 5 questions 📋")
