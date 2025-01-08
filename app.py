@@ -4,6 +4,7 @@ import json
 from main_langchain import initialization, generate_response
 from translator import translate_backwards
 from summarizer import summarize
+from topics import extract_top_keywords, generate_question_from_context
 from langchain.schema import Document
 from audio import language_supported, play_audio
 import time
@@ -67,7 +68,7 @@ if question := st.chat_input():
     input_lang = json.loads(output)['input_lang']
     st.session_state["input_lang"] = input_lang
     documents = json.loads(output)['documents']
-    
+
     # Agregar la pregunta al historial
     st.session_state["last_questions"].append(question)
     # Limitar el historial a las últimas 5 preguntas
@@ -95,13 +96,17 @@ if question := st.chat_input():
 
     st.caption(f"⏱️ Response generated in {elapsed_time:.2f} seconds.") 
 
-    # Enable the summary button
+    # Mostrar botón de generación de resumen
     st.session_state["show_summary_button"] = True
 
-    # añadir audio
+    # Añadir audio read out loud
     if language_supported(input_lang):
         st.session_state["show_play_button"] = True
-    
+
+    # Mostrar sugerencias
+    topics = extract_top_keywords(st.session_state['response'])
+    suggested_questions = generate_question_from_context(topics, st.session_state['translator'])
+    st.write(suggested_questions)
 
 if st.session_state.get("show_summary_button"):
     translator = st.session_state["translator"]

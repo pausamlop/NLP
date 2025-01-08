@@ -8,7 +8,6 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.schema import Document
 from translator import load_translation_pipeline, translate_forward, translate_backwards
 from summarizer import load_summarization_pipeline
-# from topics import extract_topics
 
 class CustomTextLoader(TextLoader):
     def load(self):
@@ -120,6 +119,3 @@ def generate_response(question, db, translator):
         except Exception as e:
             return f"An error occurred: {str(e)}"
         
-# question = "How many km2 does Vaticano City have?"
-# response = json.loads(generate_response(question))['final_response']
-# print('response: ', response)
