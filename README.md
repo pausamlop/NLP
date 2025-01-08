@@ -24,3 +24,29 @@ conda env create -f streamlit-env.yml
 conda activate streamlit-env
 streamlit run app.py
 ~~~
+
+## Referencias
+
+```bibtex
+@article{DBLP:journals/corr/abs-1910-13461,
+    author        = {Mike Lewis and Yinhan Liu and Naman Goyal and Marjan Ghazvininejad and Abdelrahman Mohamed and Omer Levy and Veselin Stoyanov and Luke Zettlemoyer},
+    title         = {{BART:} Denoising Sequence-to-Sequence Pre-training for Natural Language Generation, Translation, and Comprehension},
+    journal       = {CoRR},
+    volume        = {abs/1910.13461},
+    year          = {2019},
+    url           = {http://arxiv.org/abs/1910.13461},
+    eprinttype    = {arXiv},
+    eprint        = {1910.13461},
+    timestamp     = {Thu, 31 Oct 2019 14:02:26 +0100},
+    biburl        = {https://dblp.org/rec/journals/corr/abs-1910-13461.bib},
+    bibsource     = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{tang2020multilingual,
+    author        = {Yuqing Tang and Chau Tran and Xian Li and Peng-Jen Chen and Naman Goyal and Vishrav Chaudhary and Jiatao Gu and Angela Fan},
+    title         = {Multilingual Translation with Extensible Multilingual Pretraining and Finetuning},
+    year          = {2020},
+    eprint        = {2008.00401},
+    archivePrefix = {arXiv},
+    primaryClass  = {cs.CL}
+}
