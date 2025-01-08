@@ -4,6 +4,7 @@ import requests
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
+from bert_score import score
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.schema import Document
 from translator import load_translation_pipeline, translate_forward, translate_backwards
@@ -71,6 +72,23 @@ def initialization():
     return db, translator, summarizer
 
 
+# bertscore
+def bertscore(response, context):
+
+    # bertscore
+    precision, recall, f1score = score([response], [context], lang="en")
+
+    # imprimir metricas
+    f = open("bertscore.txt", "a")
+    f.write("Nueva comparacion:\n")
+    f.write(f"Precision: {precision[0]}\n")
+    f.write(f"Recall: {recall[0]}\n")
+    f.write(f"F1 Score: {f1score[0]}\n\n")
+    f.close()
+
+    return
+
+
 # Función para buscar documentos relevantes en el vector store
 def rag(question, db):
     searchDocs = db.similarity_search(question)
@@ -119,7 +137,7 @@ def generate_response(question, db, translator):
                 ## Answer:
                 """.format(context=context, question_en=question_en),
             "temperature": 0.6,
-            "top_p":0.9,
+            "top_p": 0.9,
             "stream": False,
         }
 
@@ -130,9 +148,12 @@ def generate_response(question, db, translator):
         try:
             # Enviar la solicitud POST a la API
             response = requests.post(url, headers=headers, data=json.dumps(data))
+            
             if response.status_code == 200:
                 # Procesar la respuesta generada por la API
                 print("Generated Response:\n", response.json()['response'])
+                # print bertscore   
+                bertscore(response.json()['response'], context)
                 # Traducir la respuesta de vuelta al idioma original
                 final_response = translate_backwards(translator, response.json()['response'], input_lang)
                 print("Translated Response:\n", final_response)
