@@ -4,7 +4,6 @@ import json
 import requests
 from gensim import corpora
 from gensim.parsing.preprocessing import STOPWORDS
-from translator import translate_backwards
 
 # Cargar el modelo de spaCy en inglés
 nlp = spacy.load("en_core_web_md")
@@ -29,13 +28,13 @@ def extract_top_keywords(context):
     context_corpus = [context_dictionary.doc2bow(doc) for doc in [tokens]]
 
     # # Crear el modelo LDA para identificar temas en el texto (un solo tema)
-    lda_model = gensim.models.LdaMulticore(
+    lda_model = gensim.models.LdaModel(
         context_corpus, 
         num_topics=1, 
         id2word=context_dictionary, 
-        passes=20, 
-        workers=4
+        passes=5
     )
+
 
     # Obtener las 5 palabras más importantes del único tema generado
     keywords = lda_model.show_topics(num_topics=1, num_words=3, formatted=False)[0][1]
@@ -71,7 +70,7 @@ def generate_question_from_context(topics):
         # Realizar la solicitud al modelo para generar la pregunta
         response = requests.post(url, headers=headers, data=json.dumps(data))
         if response.status_code == 200:
-            print("Generated Response:\n", response.json()['response'])
+            print("Question Suggested:\n", response.json()['response'])
             return response.json()['response']
         
         else:

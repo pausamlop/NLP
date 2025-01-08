@@ -22,6 +22,7 @@ Para correr la aplicación, ejecutar:
 ~~~
 conda env create -f streamlit-env.yml
 conda activate streamlit-env
+python -m spacy download en_core_web_md
 streamlit run app.py
 ~~~
 

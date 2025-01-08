@@ -1,13 +1,15 @@
 import streamlit as st
-import ollama
 import json
 from main_langchain import initialization, generate_response
-from translator import translate_backwards
+from translator import translate_forward, translate_backwards
 from summarizer import summarize
 from topics import extract_top_keywords, generate_question_from_context
 from langchain.schema import Document
 from audio import language_supported, play_audio
 import time
+
+import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # Definir los lugares y sus emojis
 places_info =[ 
@@ -136,11 +138,14 @@ if st.session_state.get("show_play_button"):
 
 # Mostrar preguntas sugeridas basadas en temas clave
 if st.session_state.get("suggest_questions"):
-    topics = extract_top_keywords(st.session_state['response'])
+    st.write(translate_backwards(translator, "Questions Suggested:", st.session_state["input_lang"]))
+    topics = extract_top_keywords(translate_forward(st.session_state['translator'], st.session_state['response'])[1])
     suggested_questions = generate_question_from_context(topics)
-    # translated_question = translate_backwards(translator, suggested_questions, st.session_state['input_lang'])
-    if st.button(suggested_questions):
+    translated_question = translate_backwards(translator, suggested_questions, st.session_state['input_lang'])
+    st.write(suggested_questions)
+    if st.button('Ask question'):
         st.session_state.messages.append({"role": "user", "content": suggested_questions})
+        st.chat_message("user", avatar="🧑‍💻").write(suggested_questions)
         db = st.session_state["db"]
         translator = st.session_state["translator"]
         summarizer = st.session_state["summarizer"]
