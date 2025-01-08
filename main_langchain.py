@@ -72,13 +72,13 @@ def initialization():
     return db, translator, summarizer
 
 
-# bertscore
+# Calcula las métricas BERTScore (Precision, Recall, F1) entre una respuesta y un contexto dado.
 def bertscore(response, context):
 
-    # bertscore
+    # Calcula las métricas utilizando el idioma inglés ("en").
     precision, recall, f1score = score([response], [context], lang="en")
 
-    # imprimir metricas
+    # Guardar los resultados
     f = open("bertscore.txt", "a")
     f.write("Nueva comparacion:\n")
     f.write(f"Precision: {precision[0]}\n")
@@ -87,7 +87,6 @@ def bertscore(response, context):
     f.close()
 
     return
-
 
 # Función para buscar documentos relevantes en el vector store
 def rag(question, db):
